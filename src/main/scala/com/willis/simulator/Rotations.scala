@@ -1,0 +1,42 @@
+package com.willis.simulator
+
+case class Rotation(name: String, piRotation: List[String], rotation: List[String])
+
+object Rotations {
+
+  /* rotations of interest
+  1x scorch mage
+  4x fireball at start regardless of PI
+  2 frostbolt
+  3 frostbolt
+  no frostbolt
+  stagger combustion
+  fireblast weaving
+  yes/no nightfall
+  yes/no DMF
+ */
+
+  val SCORCH = "SCORCH"
+  val FIREBLAST = "FIREBLAST"
+  val FROSTBOLT = "FROSTBOLT"
+  val FIREBALL = "FIREBALL"
+
+  val FIRE_SPELLS = List(SCORCH, FIREBALL, FIREBLAST)
+
+  val STANDARD = List(SCORCH, FROSTBOLT, FIREBALL)
+  val FIREBALL_4 = List(SCORCH, FROSTBOLT, FIREBALL, FROSTBOLT, FIREBALL)
+
+  val FROSTBOLT3 = Rotation("FROSTBOLT3", STANDARD, List(SCORCH, FROSTBOLT, FROSTBOLT, FROSTBOLT, FIREBALL))
+  val FIREBALL_DROP = Rotation("FIREBALL", STANDARD, STANDARD)
+  val FIREBALL_NO_DROP = Rotation("FIREBALL_NO_DROP", List(SCORCH, FIREBALL), List(SCORCH, FIREBALL))
+  val FROSTBOLT2 = Rotation("FROSTBOLT2", STANDARD, List(SCORCH, FROSTBOLT, FROSTBOLT, FIREBALL))
+  val FIREBLAST_START = Rotation("FIREBLAST_START", List(SCORCH, FIREBLAST, FIREBALL), List(SCORCH, FIREBLAST, FROSTBOLT, FROSTBOLT, FROSTBOLT, FIREBALL))
+  val FIREBLAST_WEAVING = FROSTBOLT3.copy("FIREBLAST_WEAVING")
+  val STAGGER_COMBUSTION = FROSTBOLT3.copy("STAGGER_COMBUSTION")
+  val SMART_SCORCH = FROSTBOLT3.copy("SMART_SCORCH")
+  val FIREBALL_FROSTBOLT = FROSTBOLT3.copy("FIREBALL_FROSTBOLT")
+
+  val rotations = List(FIREBALL_DROP, FIREBALL_NO_DROP, FIREBALL_FROSTBOLT, FROSTBOLT2, FROSTBOLT3, FIREBLAST_START,
+    FIREBLAST_WEAVING, STAGGER_COMBUSTION, SMART_SCORCH)
+
+}

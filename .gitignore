@@ -1,0 +1,6 @@
+.repl/**
+.idea/**
+target/**
+project/target/**
+project/project/**
+.idea/*
