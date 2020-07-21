@@ -4,7 +4,7 @@ The optimal rotation for your mage group is very dependent on the number of mage
 
 In order to accomodate how different rotations perform against each other I generated a large dataset with a large variety of conditions. I've now represented this dataset as two parallel coordinates graphs.
 
-The first graph which can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/percent_dmg_increase.html) compares all the conditions to the dps increase over a standard 3 frostbolt rotation. The second graph can be found [here]() compares all the conditions to the total dps of the given conditions.
+The first graph which can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/percent_dmg_increase.html) compares all the conditions to the dps increase over a standard 3 frostbolt rotation. The second graph can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/dps.html) compares all the conditions to the total dps of the given conditions.
 
 Both graphs can be filtered by dragging a line along any of the axes. This way you can find the optimal rotations for your particular mage team's situation. 
 
