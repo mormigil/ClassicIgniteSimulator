@@ -15,11 +15,12 @@ I had to use all numeric values for the parallel coordinates graph so the rotati
 - Rotation 0: Three Frostbolts for all non-PI mages
 - Rotation 1: All mages cast 1 frostbolt then fireball
 - Rotation 2: Mages cast fireball without letting the scorch ignite drop
-- Rotation 3: Mages cast fire blast instead of frostbolt to clear the scorch ignite
-- Rotation 4: Mages cast fire blast as soon as it is available and a 5 stack ignite exists on the target
-- Rotation 5: Non-PI mages stagger their combustion instead of all using it at once
-- Rotation 6: 1 Mage casts scorch continously while ignite has 5 stacks and at least 1.5 seconds left
-- Rotation 7: If there are less than 4 PI mages have mages up to 4 total cast one fireball after the scorch ignite is dropped. This way a non-PI mage cannot get the 5th cast, but the ignite is buil faster.
+- Rotation 3: Two Frostbolts for all non-PI mages
+- Rotation 4: Mages cast fire blast instead of frostbolt to clear the scorch ignite
+- Rotation 5: Mages cast fire blast as soon as it is available and a 5 stack ignite exists on the target
+- Rotation 6: Non-PI mages stagger their combustion instead of all using it at once
+- Rotation 7: 1 Mage casts scorch continously while ignite has 5 stacks and at least 1.5 seconds left
+- Rotation 8: If there are less than 4 PI mages have mages up to 4 total cast one fireball after the scorch ignite is dropped. This way a non-PI mage cannot get the 5th cast, but the ignite is buil faster.
 
 ## Nightfall
 
