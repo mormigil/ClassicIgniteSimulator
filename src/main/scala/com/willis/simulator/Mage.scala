@@ -10,27 +10,33 @@ case class Mage(
   scorchMage: Boolean = false,
   hasPI: Boolean = true,
   mqgStart: Int = 4) {
-  def scorch(): Int = {
+  def scorch(): Double = {
     multiply((237 + (Math.random() * 43) + spellPower * (1.5 / 3.5)))
   }
 
-  def fireball(): Int = {
+  def fireball(): Double = {
     multiply(596 + Math.random() * 164 + spellPower)
   }
 
-  def fireballr11(): Int = {
+  def fireballr11(): Double = {
     multiply(561 + Math.random() * 154 + spellPower)
   }
 
-  def frostbolt(): Int = {
-    (515 + (Math.random() * 40) + spellPower * (3 / 3.5) * .95).toInt
+  def frostbolt(): Double = {
+    (515 + (Math.random() * 40) + spellPower * (3 / 3.5) * .95)
   }
 
-  def fireblast(): Int = {
-    multiply(446 + Math.random() * 78 + spellPower * (1.5 / 3.5))
+  def fireblast(): Double = {
+    0
+//    multiply(446 + Math.random() * 78 + spellPower * (1.5 / 3.5))
   }
 
-  def multiply(dmg: Double): Int = {
-    (dmg * 1.1 * 1.1).toInt
+  def pyroblast(): Double = {
+    multiply(716 + Math.random() * 174 + spellPower)
+  }
+
+  //Fire talents dmg increase
+  def multiply(dmg: Double): Double = {
+    (dmg * 1.1)
   }
 }

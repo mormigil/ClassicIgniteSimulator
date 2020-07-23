@@ -21,26 +21,28 @@ object MageSetups {
 
     val mageSetups = mutable.Map[MageSetup, List[Mage]]()
 
-    for (numMages <- 4 to 8) {
+    for (numMages <- 3 to 8) {
       for (numWB <- 0 to numMages) {
         for (semiWB <- numWB to numMages) {
-          for (pis <- 1 to 5) {
+          for (pis <- 0 to 5) {
             for (nightfall <- 0 to 1) {
               for (dmf <- 0 to 1) {
-                for (fightLength <- 45 to 105 by 15) {
+                for (fightLength <- 40 to 120 by 20) {
                   for (rotation <- Rotations.rotations) {
                     val ms = MageSetup(numMages, numWB, semiWB - numWB, pis, baseCrit, hit, sp, nightfall == 1, dmf == 1, fightLength, rotation)
                     val mageList = List.tabulate(numMages) { mageI =>
                       val adjustedCrit = if (mageI < numWB) baseCrit + 18 else if (mageI < semiWB) baseCrit + 10 else baseCrit
-                      val rotationList = if (mageI < pis) {
+                      val rotationList = if (mageI == 0 && pis > 0 && rotation.name == Rotations.PYRO_START.name) {
+                        Rotations.PYROBLAST_START
+                      } else if (mageI < pis) {
                         rotation.piRotation
-                      } else if (mageI < 4 && rotation.name == Rotations.FIREBALL_FROSTBOLT.name) {
-                        Rotations.FIREBALL_4
                       } else {
                         rotation.rotation
                       }
+                      val finalRotationList = if (numMages < 6) Rotations.SCORCH :: rotationList else rotationList
                       val scorchMage = if (rotation.name == Rotations.SMART_SCORCH.name && mageI == 0) true else false
-                      Mage(adjustedCrit.toDouble / 100, hit.toDouble / 100, mageI, rotationList, sp, scorchMage, mageI < pis, if (mageI < pis) 4 else 24)
+                      val spell_power = if (Rotations.ON_USE_VS_TEAR.name == rotation.name && mageI < pis) sp - 55 else sp
+                      Mage(adjustedCrit.toDouble / 100, hit.toDouble / 100, mageI, finalRotationList, spell_power, scorchMage, mageI < pis, if (mageI < pis) 4 else 24)
                     }
                     mageSetups.put(ms, mageList)
                   }
