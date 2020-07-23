@@ -28,7 +28,7 @@ case class Mage(
 
   def fireblast(): Double = {
     0
-//    multiply(446 + Math.random() * 78 + spellPower * (1.5 / 3.5))
+    //    multiply(446 + Math.random() * 78 + spellPower * (1.5 / 3.5))
   }
 
   def pyroblast(): Double = {
