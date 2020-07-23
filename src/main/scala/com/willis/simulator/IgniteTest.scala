@@ -47,138 +47,138 @@ object IgniteTest {
 
     val magesMap = MageSetups.genMageSetups(21, 99, 863)
 
-//    implicit val spark = SparkSession.builder().appName("Agg Script For Playtesting")
-//      .master("yarn")
-//      .getOrCreate()
-//
-//    import spark.implicits._
-//
-//    println(magesMap.size)
-//
-//    val dataset = spark.createDataset(magesMap.toList).repartition(1000)
-//      .map {
-//        case (setup, mages) =>
-//          val trialSetups = List.fill(NUM_TRIALS) {
-//            val mageStates = mages.map(mage => if (mage.hasPI && (setup.rotation.name == Rotations.PRE_COMBUSTION
-//              || (mage.mageId == 0 && setup.rotation.name == Rotations.PYRO_START.name))) {
-//              MageState(mage, combustionMult = 3, combustionStacks = 2)
-//            } else if (mage.hasPI && setup.rotation.name != Rotations.FROSTBOLT2_HOLD_COMBUSTION.name) {
-//              if (setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
-//                MageState(mage, castTime = 1.5 * Math.random(), combustionMult = 1, combustionStacks = 3)
-//              } else {
-//                MageState(mage, combustionMult = 1, combustionStacks = 3)
-//              }
-//            } else {
-//              if (setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
-//                MageState(mage, 1.5 * Math.random())
-//              } else {
-//                MageState(mage)
-//              }
-//            })
-//            TrialSetup(setup, mageStates)
-//          }
-//          (setup, trialSetups)
-//      }.map {
-//        case (setup, trialSetups) =>
-//          val trials = trialSetups.map(ts => simulateFight(ts.mageStates, ts.mageSetup))
-//
-//          val avgDps = (trials.map(_.totalDmg.toDouble / NUM_TRIALS).sum / setup.fightLength).round
-//          val sortedDps = trials.map(_.totalDmg.toDouble / setup.fightLength).sorted
-//          val firstQuartile = sortedDps(trials.size / 4).round
-//          val median = sortedDps(trials.size / 2).round
-//          val thirdQuartile = sortedDps(trials.size - trials.size / 4).round
-//          val avgIgniteDps = trials.map(_.igniteDmg.toDouble / NUM_TRIALS).sum / setup.fightLength
-//          val dpsStdDev = Math.sqrt((trials.map(xi => math.pow(xi.totalDmg.toDouble / setup.fightLength - avgDps, 2)).sum) / NUM_TRIALS)
-//          val maxIgniteDrops = trials.map(_.igniteTimes.size).max
-//          val igniteDrops = trials.map(_.igniteTimes).map(x => x.toList ++ List.fill(maxIgniteDrops - x.size)(setup.fightLength.toDouble))
-//            .reduce((l, r) => l.zip(r).map(z => z._2 + z._1)).map(_ / NUM_TRIALS)
-//
-//          val boxPlot = s"Boxplot values: ${sortedDps.head.round}, $firstQuartile, $median, $avgDps, $thirdQuartile, ${sortedDps.last.round}"
-//          val igniteDropString = s"Ignite Drop times on avg $igniteDrops"
-//
-//          println(boxPlot)
-//
-//          FinalRowFormat(setup.numMages, setup.nightfall, setup.dmf, setup.fightLength, setup.numPIs, setup.numWB, setup.semiWB,
-//            setup.rotation.name, avgDps, avgIgniteDps, dpsStdDev, boxPlot, igniteDropString)
-//      }
-//
-//    val standard = dataset.filter(_.rotation == Rotations.FIREBALL_DROP.name).withColumnRenamed("dps", "fbdps")
-//      .withColumnRenamed("igniteDps", "ignitefbdps").withColumnRenamed("rotation", "fbRotation")
-//      .drop("stdDev", "boxPlot", "igniteDrops")
-//
-//    dataset
-//      .join(standard, Seq("numMages", "nightfall", "darkmoon", "fightLength", "numPIs", "numWB", "semiWB"))
-//      .withColumn("percentDpsIncrease", $"dps" / $"fbdps")
-//      .withColumn("percentIgniteDpsIncrease", $"igniteDps" / $"ignitefbdps")
-//      .as[FinalRowFormatPercent].drop("fbdps", "ignitefbdps", "fbRotation")
-//      .repartition(1)
-//      .write.option("header", "true").mode(SaveMode.Overwrite)
-//      .csv("gs://unity-analytics-blender-data-prd/willis/test_run")
+    implicit val spark = SparkSession.builder().appName("Agg Script For Playtesting")
+      .master("yarn")
+      .getOrCreate()
 
-    val setups = Rotations.rotations.map(MageSetup(6, 6, 0, 2, 21, 99, 863, false, false, 100, _))
+    import spark.implicits._
 
-//    val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
-//      MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
+    println(magesMap.size)
 
-    for (setup <- setups) {
-      val mages = magesMap(setup)
-
-      val trials = List.fill(NUM_TRIALS) {
-        val mageStates = mages.map(mage => if (mage.hasPI && (setup.rotation.name == Rotations.PRE_COMBUSTION
-        || (mage.mageId == 0 && setup.rotation.name == Rotations.PYRO_START.name))) {
-          MageState(mage, combustionMult = 3, combustionStacks = 2)
-        } else if(mage.hasPI && setup.rotation.name != Rotations.FROSTBOLT2_HOLD_COMBUSTION.name) {
-          if(setup.rotation.name == Rotations.FIREBLAST_WEAVING.name){
-            MageState(mage, castTime = 1.5 * Math.random(), combustionMult = 1, combustionStacks = 3)
-          } else {
-            MageState(mage, combustionMult = 1, combustionStacks = 3)
+    val dataset = spark.createDataset(magesMap.toList).repartition(1000)
+      .map {
+        case (setup, mages) =>
+          val trialSetups = List.fill(NUM_TRIALS) {
+            val mageStates = mages.map(mage => if (mage.hasPI && (setup.rotation.name == Rotations.PRE_COMBUSTION
+              || (mage.mageId == 0 && setup.rotation.name == Rotations.PYRO_START.name))) {
+              MageState(mage, combustionMult = 3, combustionStacks = 2)
+            } else if (mage.hasPI && setup.rotation.name != Rotations.FROSTBOLT2_HOLD_COMBUSTION.name) {
+              if (setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
+                MageState(mage, castTime = 1.5 * Math.random(), combustionMult = 1, combustionStacks = 3)
+              } else {
+                MageState(mage, combustionMult = 1, combustionStacks = 3)
+              }
+            } else {
+              if (setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
+                MageState(mage, 1.5 * Math.random())
+              } else {
+                MageState(mage)
+              }
+            })
+            TrialSetup(setup, mageStates)
           }
-        } else {
-          if(setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
-            MageState(mage, 1.5 * Math.random())
-          } else {
-            MageState(mage)
-          }
-        })
+          (setup, trialSetups)
+      }.map {
+        case (setup, trialSetups) =>
+          val trials = trialSetups.map(ts => simulateFight(ts.mageStates, ts.mageSetup))
 
-        simulateFight(mageStates, setup)
+          val avgDps = (trials.map(_.totalDmg.toDouble / NUM_TRIALS).sum).round
+          val sortedDps = trials.map(_.totalDmg.toDouble).sorted
+          val firstQuartile = sortedDps(trials.size / 4).round
+          val median = sortedDps(trials.size / 2).round
+          val thirdQuartile = sortedDps(trials.size - trials.size / 4).round
+          val avgIgniteDps = trials.map(_.igniteDmg.toDouble / NUM_TRIALS).sum / setup.fightLength
+          val dpsStdDev = Math.sqrt((trials.map(xi => math.pow(xi.totalDmg.toDouble - avgDps, 2)).sum) / NUM_TRIALS)
+          val maxIgniteDrops = trials.map(_.igniteTimes.size).max
+          val igniteDrops = trials.map(_.igniteTimes).map(x => x.toList ++ List.fill(maxIgniteDrops - x.size)(setup.fightLength.toDouble))
+            .reduce((l, r) => l.zip(r).map(z => z._2 + z._1)).map(_ / NUM_TRIALS)
+
+          val boxPlot = s"Boxplot values: ${sortedDps.head.round}, $firstQuartile, $median, $avgDps, $thirdQuartile, ${sortedDps.last.round}"
+          val igniteDropString = s"Ignite Drop times on avg $igniteDrops"
+
+          println(boxPlot)
+
+          FinalRowFormat(setup.numMages, setup.nightfall, setup.dmf, setup.fightLength, setup.numPIs, setup.numWB, setup.semiWB,
+            setup.rotation.name, avgDps, avgIgniteDps, dpsStdDev, boxPlot, igniteDropString)
       }
 
-//      println(maxTick)
-//      println(biggestCrit)
-//      println(maxMultiplier)
-//      println(avgMultiplier / multiplierCount)
-//      println(multiplierCount)
-//      println(notPICount)
+    val standard = dataset.filter(_.rotation == Rotations.FIREBALL_DROP.name).withColumnRenamed("dps", "fbdps")
+      .withColumnRenamed("igniteDps", "ignitefbdps").withColumnRenamed("rotation", "fbRotation")
+      .drop("stdDev", "boxPlot", "igniteDrops")
 
-      avgMultiplier = 0
-      multiplierCount = 0
-      maxMultiplier = 0.0
-      notPICount = 0
+    dataset
+      .join(standard, Seq("numMages", "nightfall", "darkmoon", "fightLength", "numPIs", "numWB", "semiWB"))
+      .withColumn("percentDpsIncrease", $"dps" / $"fbdps")
+      .withColumn("percentIgniteDpsIncrease", $"igniteDps" / $"ignitefbdps")
+      .as[FinalRowFormatPercent].drop("fbdps", "ignitefbdps", "fbRotation")
+      .repartition(1)
+      .write.option("header", "true").mode(SaveMode.Overwrite)
+      .csv("gs://unity-analytics-blender-data-prd/willis/test_run")
 
-      val avgDps = (trials.map(_.totalDmg / NUM_TRIALS).sum ).round
-      val sortedDps = trials.map(_.totalDmg ).sorted
-      val firstQuartile = sortedDps(trials.size / 4).round
-      val median = sortedDps(trials.size / 2).round
-      val thirdQuartile = sortedDps(trials.size - trials.size / 4).round
-      val avgIgniteDmg = trials.map(_.igniteDmg.toDouble / NUM_TRIALS).sum
-      val dpsStdDev = Math.sqrt((trials.map(xi => math.pow(xi.totalDmg - avgDps, 2)).sum) / NUM_TRIALS)
-      val maxIgniteDrops = trials.map(_.igniteTimes.size).max
-      val igniteDrops = trials.map(_.igniteTimes).map(x => x.toList ++ List.fill(maxIgniteDrops - x.size)(setup.fightLength.toDouble))
-        .reduce((l, r) => l.zip(r).map(z => z._2 + z._1)).map(_ / NUM_TRIALS)
-
-//      println(mqgCasts.toDouble / NUM_TRIALS)
-//      println(fireballCasts.toDouble / NUM_TRIALS)
-//      println(scorchCasts.toDouble / NUM_TRIALS)
-
-      println(setup.rotation)
-//      println(dpsStdDev)
-      println(s"Boxplot values: ${sortedDps.head.round}, $firstQuartile, $median, $avgDps, $thirdQuartile, ${sortedDps.last.round}")
-      println(s"Confidence interval 99%: ${avgDps} +/- ${(2.576 * dpsStdDev / math.sqrt(NUM_TRIALS)).round}")
-      println(avgIgniteDmg / setup.fightLength)
-      println(igniteDrops)
-
-    }
+//    val setups = Rotations.rotations.map(MageSetup(6, 6, 0, 2, 21, 99, 863, false, false, 100, _))
+//
+////    val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
+////      MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
+//
+//    for (setup <- setups) {
+//      val mages = magesMap(setup)
+//
+//      val trials = List.fill(NUM_TRIALS) {
+//        val mageStates = mages.map(mage => if (mage.hasPI && (setup.rotation.name == Rotations.PRE_COMBUSTION
+//        || (mage.mageId == 0 && setup.rotation.name == Rotations.PYRO_START.name))) {
+//          MageState(mage, combustionMult = 3, combustionStacks = 2)
+//        } else if(mage.hasPI && setup.rotation.name != Rotations.FROSTBOLT2_HOLD_COMBUSTION.name) {
+//          if(setup.rotation.name == Rotations.FIREBLAST_WEAVING.name){
+//            MageState(mage, castTime = 1.5 * Math.random(), combustionMult = 1, combustionStacks = 3)
+//          } else {
+//            MageState(mage, combustionMult = 1, combustionStacks = 3)
+//          }
+//        } else {
+//          if(setup.rotation.name == Rotations.FIREBLAST_WEAVING.name) {
+//            MageState(mage, 1.5 * Math.random())
+//          } else {
+//            MageState(mage)
+//          }
+//        })
+//
+//        simulateFight(mageStates, setup)
+//      }
+//
+////      println(maxTick)
+////      println(biggestCrit)
+////      println(maxMultiplier)
+////      println(avgMultiplier / multiplierCount)
+////      println(multiplierCount)
+////      println(notPICount)
+//
+//      avgMultiplier = 0
+//      multiplierCount = 0
+//      maxMultiplier = 0.0
+//      notPICount = 0
+//
+//      val avgDps = (trials.map(_.totalDmg / NUM_TRIALS).sum )
+//      val sortedDps = trials.map(_.totalDmg ).sorted
+//      val firstQuartile = sortedDps(trials.size / 4).round
+//      val median = sortedDps(trials.size / 2).round
+//      val thirdQuartile = sortedDps(trials.size - trials.size / 4).round
+//      val avgIgniteDmg = trials.map(_.igniteDmg.toDouble / NUM_TRIALS).sum
+//      val dpsStdDev = Math.sqrt((trials.map(xi => math.pow(xi.totalDmg - avgDps, 2)).sum) / NUM_TRIALS)
+//      val maxIgniteDrops = trials.map(_.igniteTimes.size).max
+//      val igniteDrops = trials.map(_.igniteTimes).map(x => x.toList ++ List.fill(maxIgniteDrops - x.size)(setup.fightLength.toDouble))
+//        .reduce((l, r) => l.zip(r).map(z => z._2 + z._1)).map(_ / NUM_TRIALS)
+//
+////      println(mqgCasts.toDouble / NUM_TRIALS)
+////      println(fireballCasts.toDouble / NUM_TRIALS)
+////      println(scorchCasts.toDouble / NUM_TRIALS)
+//
+//      println(setup.rotation)
+////      println(dpsStdDev)
+//      println(s"Boxplot values: ${sortedDps.head.round}, $firstQuartile, $median, $avgDps, $thirdQuartile, ${sortedDps.last.round}")
+//      println(s"Confidence interval 99%: ${avgDps} +/- ${(2.576 * dpsStdDev / math.sqrt(NUM_TRIALS)).round}")
+//      println(avgIgniteDmg / setup.fightLength)
+//      println(igniteDrops)
+//
+//    }
 
   }
 
