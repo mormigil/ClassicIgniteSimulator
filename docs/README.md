@@ -25,21 +25,22 @@ I had to use all numeric values for the parallel coordinates graph so the rotati
     + PI: Scorch -> Fire Blast -> Combustion -> Fireball -> MQG
     + Non-PI: Scorch -> Frostbolt -> Fireball -> Combustion
 - Rotation 4: Fireblast weaving. Same as Rotation 1 except cast fireblast when off cooldown when a 5 stack ignite exists
-- Rotation 5: Same as rotation 1 except Non-PI Mages stagger their combustions
-- Rotation 6: Same as rotation 1 except 1 Mage casts scorch continously while ignite has 5 stacks and at least 1.5 seconds left
-- Rotation 7 Same as rotation 2 except all mages have improved frostbolt talent
-- Rotation 8: Same as rotation 1 except use an on use trinket (toep) at the expense of having less raw spell power
-- Rotation 9: Same as rotation 1 except have combustion pre-stacked before the fight starts specifically 30% crit chance and 2 charges remaining
-- Rotation 10: 
-    + PI: Scorch -> Combustion -> Pyroblast -> Frostbolt
+- Rotation 5: Same as rotation 1 except 1 Mage casts scorch continously while ignite has 5 stacks and at least 1.5 seconds left
+- Rotation 6 Same as rotation 2 except all mages have improved frostbolt talent
+- Rotation 7: Same as rotation 1 except use an on use trinket (toep) at the expense of having less raw spell power
+- Rotation 8: Same as rotation 1 except have combustion pre-stacked before the fight starts specifically 30% crit chance and 2 charges remaining
+- Rotation 9: 
+    + PI: Scorch -> Combustion + MQG -> Pyroblast -> Frostbolt
     + Non-PI: Scorch -> Pyroblast -> Frostbolt
-
-## Nightfall
-
-I wanted to view the results of hunters or some melee using a nightfall at the start of a fight when the ignite is being built. To simulate this when the nightfall column is true (equals 1) there is a 30% chance of an activation at the 5 second timestamp. This means most if not all the initial ignites will be created with nightfall active.
+- Rotation 10: Same as 9, but with R11 fireballs
+- Rotation 11: Same as 1, but with R11 fireballs
 
 ## Num Ony
 
 This column just reflects mages that only haave ony buff.
 
+
+## Looking at the raw data
+
+Feel free to peruse through the raw data I split it into files based on the number of mages to make it a little easier to parse. There is a new column called weightedTicks that can be used to recompute the ignite dps for any value of spell power instead of resimming the result.
 
