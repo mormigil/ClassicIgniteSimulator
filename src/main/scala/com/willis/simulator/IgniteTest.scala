@@ -16,7 +16,7 @@ object IgniteTest {
   //add combustion batching
   //add second trinket usage
 
-  val NUM_TRIALS = 5000
+  val NUM_TRIALS = 10000
 
   //debugging
   var maxTick = 0.0
@@ -31,31 +31,41 @@ object IgniteTest {
   var mqgCasts = 0
   var fireballCasts = 0
   var scorchCasts = 0
+  var fireballDPS = 0.0
+  var fireballDPSWithCrit = 0.0
+  var numTicks = 0.0
 
   //spark row classes
-  case class ResultRow(mageSetup: MageSetup, totalDmg: Double, igniteDmg: Int, igniteTimes: ListBuffer[Double])
+  case class ResultRow(mageSetup: MageSetup, totalDmg: Double, igniteDmg: Double, weightedTicks: Double, igniteTimes: ListBuffer[Double])
   //  case class SetupMetric(mageSetup: MageSetup, avgDmg: Double, avgIgniteDmg: Double)
   case class FinalRowFormat(numMages: Int, nightfall: Boolean, darkmoon: Boolean, fightLength: Int, numPIs: Int,
-    numWB: Int, semiWB: Int, rotation: String, dps: Double, igniteDps: Double, stdDev: Double,
+    numWB: Int, semiWB: Int, rotation: String, dps: Double, igniteDps: Double, weightedTicks: Double, stdDev: Double,
     boxPlot: String, igniteDrops: String)
 
   case class FinalRowFormatPercent(numMages: Int, nightfall: Boolean, darkmoon: Boolean, fightLength: Int, numPIs: Int,
-    numWB: Int, semiWB: Int, rotation: String, dps: Double, igniteDps: Double, stdDev: Double,
+    numWB: Int, semiWB: Int, rotation: String, dps: Double, igniteDps: Double, weightedTicks: Double, stdDev: Double,
     boxPlot: String, igniteDrops: String, percentDpsIncrease: Double, percentIgniteDpsIncrease: Double)
 
   def main(args: Array[String]): Unit = {
 
-    val magesMap = MageSetups.genMageSetups(21, 99, 863)
+    val magesMap = MageSetups.genMageSetups(21, 99, 750)
+
+    val testMap = magesMap.filter(setup => setup._1.dmf == false && setup._1.nightfall == false)
+
+    println(testMap.size)
 
     implicit val spark = SparkSession.builder().appName("Agg Script For Playtesting")
       .master("yarn")
       .getOrCreate()
 
+    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+    spark.conf.set("spark.sql.broadcastTimeout", 3000)
+
     import spark.implicits._
 
     println(magesMap.size)
 
-    val dataset = spark.createDataset(magesMap.toList).repartition(1000)
+    val dataset = spark.createDataset(testMap.toList).repartition(10000)
       .map {
         case (setup, mages) =>
           val trialSetups = List.fill(NUM_TRIALS) {
@@ -66,11 +76,11 @@ object IgniteTest {
         case (setup, trialSetups) =>
           val trials = trialSetups.map(ts => simulateFight(ts.mageStates, ts.mageSetup))
           createMetrics(setup, trials)
-      }
+      }.cache()
 
     val standard = dataset.filter(_.rotation == Rotations.FIREBALL_DROP.name).withColumnRenamed("dps", "fbdps")
       .withColumnRenamed("igniteDps", "ignitefbdps").withColumnRenamed("rotation", "fbRotation")
-      .drop("stdDev", "boxPlot", "igniteDrops")
+      .drop("stdDev", "boxPlot", "igniteDrops", "weightedTicks")
 
     dataset
       .join(standard, Seq("numMages", "nightfall", "darkmoon", "fightLength", "numPIs", "numWB", "semiWB"))
@@ -79,12 +89,22 @@ object IgniteTest {
       .as[FinalRowFormatPercent].drop("fbdps", "ignitefbdps", "fbRotation")
       .repartition(1)
       .write.option("header", "true").mode(SaveMode.Overwrite)
+      //      .csv("Simulation")
       .csv("gs://unity-analytics-blender-data-prd/willis/test_run")
 
-    //    val setups = Rotations.rotations.map(MageSetup(6, 6, 0, 2, 21, 99, 863, false, false, 100, _))
+    //    val setups = Rotations.rotations.take(1).flatMap{ x =>
+    //      List(MageSetup(7, 7, 0, 2, 21, 99, 750, false, false, 100, x),
+    //        MageSetup(7, 6, 0, 2, 21, 99, 750, false, false, 100, x),
+    //        MageSetup(7, 5, 0, 2, 21, 99, 750, false, false, 100, x),
+    //        MageSetup(7, 2, 0, 2, 21, 99, 750, false, false, 100, x)
+    //        //MageSetup(6, 0, 0, 2, 21, 99, 750, false, false, 100, x)
+    //      )
+    //    }.sortBy(_.rotation.name)
     //
-    //    //    val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
-    //    //      MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
+    //
+    //
+    ////        val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
+    ////          MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
     //
     //    for (setup <- setups) {
     //      val mages = magesMap(setup)
@@ -102,6 +122,9 @@ object IgniteTest {
     //      //      println(multiplierCount)
     //      //      println(notPICount)
     //
+    //      println(s"Num ticks equals: ${numTicks/NUM_TRIALS}")
+    //
+    //      numTicks = 0
     //      avgMultiplier = 0
     //      multiplierCount = 0
     //      maxMultiplier = 0.0
@@ -113,13 +136,14 @@ object IgniteTest {
     //      //      println(fireballCasts.toDouble / NUM_TRIALS)
     //      //      println(scorchCasts.toDouble / NUM_TRIALS)
     //
-    //      println(setup.rotation)
+    //      println(setup)
     //      //      println(dpsStdDev)
     //      println(rowMetric.boxPlot)
     //      println(s"Confidence interval 99%: ${rowMetric.dps} +/- ${(2.576 * rowMetric.stdDev / math.sqrt(NUM_TRIALS)).round}")
     //      println(rowMetric.igniteDps)
+    //      println(rowMetric.weightedTicks)
     //      println(rowMetric.igniteDrops)
-
+    //
     //    }
 
   }
@@ -150,7 +174,8 @@ object IgniteTest {
     val firstQuartile = sortedDps(trials.size / 4).round
     val median = sortedDps(trials.size / 2).round
     val thirdQuartile = sortedDps(trials.size - trials.size / 4).round
-    val avgIgniteDps = trials.map(_.igniteDmg.toDouble / NUM_TRIALS).sum / setup.fightLength
+    val avgIgniteDps = trials.map(_.igniteDmg / NUM_TRIALS).sum
+    val avgIgniteTicks = trials.map(_.weightedTicks / NUM_TRIALS).sum
     val dpsStdDev = Math.sqrt((trials.map(xi => math.pow(xi.totalDmg - avgDps, 2)).sum) / NUM_TRIALS)
     val maxIgniteDrops = trials.map(_.igniteTimes.size).max
     val igniteDrops = trials.map(_.igniteTimes).map(x => x.toList ++ List.fill(maxIgniteDrops - x.size)(setup.fightLength.toDouble))
@@ -158,20 +183,28 @@ object IgniteTest {
 
     val boxPlot = s"Boxplot values: ${sortedDps.head.round}, $firstQuartile, $median, $avgDps, $thirdQuartile, ${sortedDps.last.round}"
     val igniteDropString = s"Ignite Drop times on avg $igniteDrops"
-    
+
     FinalRowFormat(setup.numMages, setup.nightfall, setup.dmf, setup.fightLength, setup.numPIs, setup.numWB, setup.semiWB,
-      setup.rotation.name, avgDps, avgIgniteDps.round, dpsStdDev, boxPlot, igniteDropString)
+      setup.rotation.name, avgDps, avgIgniteDps.round, avgIgniteTicks, dpsStdDev, boxPlot, igniteDropString)
   }
 
   case class FVulnState(stacks: Int = 0, refresh: Double = 0)
-  case class IgniteState(lastCrit: Double = 0, igniteTick: Double = Double.MaxValue,
-    igniteSize: Double = 0, igniteStacks: Int = 0, dipMultiplier: Double = 1)
+  case class IgniteState(lastCrit: Double = 0, igniteTick: Double = Double.MaxValue, igniteSize: Double = 0,
+    igniteStacks: Int = 0, dipMultiplier: Double = 1, numPIFireball: Int = 0, weightedTicks: Double = 0)
+
+  def weightTick(igniteState: IgniteState): Double = {
+    igniteState.dipMultiplier * (igniteState.igniteStacks + igniteState.numPIFireball.toDouble * .2) / 5
+  }
 
   def updateIgnite(castDmg: Double, castTime: Double, fireCrit: Boolean, multiplier: Double,
     igniteState: IgniteState): (Double, IgniteState) = {
 
     val shouldTick = castTime > igniteState.igniteTick && igniteState.igniteTick < igniteState.lastCrit + 4
     val dmg = if (shouldTick) igniteState.igniteSize * igniteState.dipMultiplier else 0
+    val weightedTicks = if (shouldTick) {
+      numTicks += 1
+      igniteState.weightedTicks + weightTick(igniteState)
+    } else igniteState.weightedTicks
     maxTick = math.max(dmg, maxTick)
     val nextTick = if (shouldTick) igniteState.igniteTick + 2 else igniteState.igniteTick
 
@@ -183,15 +216,16 @@ object IgniteTest {
           multiplierCount += 1
         }
         maxMultiplier = math.max(maxMultiplier, multiplier)
-        (dmg, IgniteState(castTime, castTime + 2, (castDmg * 1.5 * .2), 1, multiplier))
+        (dmg, IgniteState(castTime, castTime + 2, (castDmg * 1.5 * .2), 1, multiplier, if (multiplier > 1.5) 1 else 0))
       } else if (igniteState.igniteStacks < 5) {
+        val numPIFireballs = if (multiplier > 1.5) igniteState.numPIFireball + 1 else igniteState.numPIFireball
         (dmg, igniteState.copy(castTime, nextTick, igniteState.igniteSize + (castDmg * 1.5 * .2),
-          igniteState.igniteStacks + 1))
+          igniteState.igniteStacks + 1, weightedTicks = weightedTicks, numPIFireball = numPIFireballs))
       } else {
-        (dmg, igniteState.copy(castTime, nextTick))
+        (dmg, igniteState.copy(castTime, nextTick, weightedTicks = weightedTicks))
       }
     } else {
-      (dmg, igniteState.copy(igniteTick = nextTick))
+      (dmg, igniteState.copy(igniteTick = nextTick, weightedTicks = weightedTicks))
     }
   }
 
@@ -229,6 +263,8 @@ object IgniteTest {
     val pq = PriorityQueue.empty[MageState](Ordering.by(_.castTime * -1))
     pq ++= mageStates
 
+    val fightLength = mageSetup.fightLength - 5 + math.random * 10
+
     var curMageState = pq.dequeue()
     var igniteDropList = ListBuffer.empty[Double]
 
@@ -245,12 +281,12 @@ object IgniteTest {
 
     var totalIgniteDmg = 0
     var totalCastDmg = 0
+    var totalWeightedTicks = 0.0
     var piStart = -15.0
 
-    var nightfall = if (math.random < .4 && mageSetup.nightfall) 5 else -10
+    val nightfall = if (math.random < .4 && mageSetup.nightfall) 6.5 else -10
     val dmf = if (mageSetup.dmf) 1.1 else 1
     val coe = 1.1
-    val fightLength = mageSetup.fightLength - 5 + math.random * 10
 
     while (curMageState.castTime < fightLength) {
 
@@ -310,6 +346,11 @@ object IgniteTest {
 
       val castDmgWithCrit = if (spellCrit) multCastDmg * 1.5 else multCastDmg
 
+      if (curMageState.spell == Rotations.FIREBALL) {
+        fireballDPS += multCastDmg / fightLength
+        fireballDPSWithCrit += castDmgWithCrit / fightLength
+      }
+
       biggestCrit = math.max(biggestCrit, castDmgWithCrit)
 
       totalCastDmg = totalCastDmg + castDmgWithCrit.toInt
@@ -319,6 +360,7 @@ object IgniteTest {
         //        println(s"dropped ignite at ${lastCrit + 4}")
 
         if (igniteState.lastCrit > 6) {
+          totalWeightedTicks += igniteState.weightedTicks
           igniteDropList += igniteState.lastCrit + 4
         }
         igniteState = IgniteState()
@@ -404,6 +446,8 @@ object IgniteTest {
 
     }
 
+    totalWeightedTicks += igniteState.weightedTicks
+
     val lastIgniteTicks = if (igniteState.igniteTick < fightLength - 2 && igniteState.lastCrit + 4 > fightLength) {
       igniteState.igniteSize * 2
     } else if (igniteState.igniteTick < fightLength) {
@@ -415,7 +459,7 @@ object IgniteTest {
     totalIgniteDmg = totalIgniteDmg + lastIgniteTicks.toInt
     val totalDmg = totalIgniteDmg + totalCastDmg
 
-    ResultRow(mageSetup, totalDmg / fightLength, totalIgniteDmg, igniteDropList)
+    ResultRow(mageSetup, totalDmg / fightLength, totalIgniteDmg / fightLength, totalWeightedTicks, igniteDropList)
   }
 
   def calcPI(piStart: Double, curMageState: MageState): Double = {
