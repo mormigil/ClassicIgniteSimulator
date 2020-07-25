@@ -13,13 +13,13 @@ Both graphs can be filtered by dragging a line along any of the axes. This way y
 I had to use all numeric values for the parallel coordinates graph so the rotations are numbered as the indexes of a list. 
 
 - Rotation 0:
-    + PI: Scorch -> Combustion + MQG -> Frostbolt -> Fireball
+    + PI: Scorch -> Combustion -> Frostbolt -> MQG -> Fireball
     + Non-PI: Scorch -> Frostbolt -> Frostbolt -> Frostbolt -> Fireball
 - Rotation 1:
-    + PI: Scorch -> Combustion + MQG -> Frostbolt -> Fireball
+    + PI: Scorch -> Combustion -> Frostbolt -> MQG -> Fireball
     + Non-PI: Scorch -> Frostbolt -> Fireball -> Combustion
 - Rotation 2:
-    + PI: Scorch -> Combustion + MQG -> Frostbolt -> Fireball
+    + PI: Scorch -> Combustion -> Frostbolt -> MQG -> Fireball
     + Non-PI: Scorch -> Frostbolt -> Frostbolt -> Fireball -> Combustion
 - Rotation 3:
     + PI: Scorch -> Fire Blast -> Combustion -> Fireball -> MQG
@@ -30,8 +30,8 @@ I had to use all numeric values for the parallel coordinates graph so the rotati
 - Rotation 7: Same as rotation 1 except use an on use trinket (toep) at the expense of having less raw spell power
 - Rotation 8: Same as rotation 1 except have combustion pre-stacked before the fight starts specifically 30% crit chance and 2 charges remaining
 - Rotation 9: 
-    + PI: Scorch -> Combustion + MQG -> Pyroblast -> Frostbolt
-    + Non-PI: Scorch -> Pyroblast -> Frostbolt
+    + PI: Scorch -> Combustion + MQG -> Pyroblast -> Fireball
+    + Non-PI: Scorch -> Pyroblast -> Fireball
 - Rotation 10: Same as 9, but with R11 fireballs
 - Rotation 11: Same as 1, but with R11 fireballs
 
