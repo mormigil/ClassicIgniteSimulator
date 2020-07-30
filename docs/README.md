@@ -4,7 +4,7 @@ The optimal rotation for your mage group is very dependent on the number of mage
 
 In order to accomodate how different rotations perform against each other I generated a large dataset with a large variety of conditions. I've now represented this dataset as two parallel coordinates graphs.
 
-The first graph which can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/percent_dmg_increase_updated.html) compares all the conditions to the dps increase over a standard 1 frostbolt rotation. The second graph can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/dps_updated.html) compares all the conditions to the total dps of the given conditions. Finally a third graph can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/ignite_dps_updated.html) to find the highest ignite dps given these conditions if you want to game it for parsing.
+The first graph which can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/percent_dmg_increase.html) compares all the conditions to the dps increase over a standard 1 frostbolt rotation. The second graph can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/dps_updated.html) compares all the conditions to the total dps of the given conditions. Finally a third graph can be found [here](https://mormigil.github.io/ClassicIgniteSimulator/ignite_dps_updated.html) to find the highest ignite dps given these conditions if you want to game it for parsing.
 
 Both graphs can be filtered by dragging a line along any of the axes. This way you can find the optimal rotations for your particular mage team's situation. 
 
@@ -44,7 +44,6 @@ Feel free to peruse through the raw data I split it into files based on the numb
 ## Older versions of ignite
 
 Before the 4 second window change here were the comparison charts:
-[Percent damage increase](https://mormigil.github.io/ClassicIgniteSimulator/percent_dmg_increase.html)
 [Raw DPS](https://mormigil.github.io/ClassicIgniteSimulator/dps.html)
 [Ignite DPS](https://mormigil.github.io/ClassicIgniteSimulator/ignite_dps.html)
 
