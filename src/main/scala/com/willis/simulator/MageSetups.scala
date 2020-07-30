@@ -31,7 +31,7 @@ object MageSetups {
                   for (rotation <- Rotations.rotations) {
                     val ms = MageSetup(numMages, numWB, semiWB - numWB, pis, baseCrit, hit, sp, nightfall == 1, dmf == 1, fightLength, rotation)
                     val mageList = List.tabulate(numMages) { mageI =>
-                      val adjustedCrit = if (mageI < numWB) baseCrit + 18 else if (mageI < semiWB) baseCrit + 10 else baseCrit
+                      var adjustedCrit = if (mageI < numWB) baseCrit + 18 else if (mageI < semiWB) baseCrit + 10 else baseCrit
                       val rotationList = if (mageI == 0 && pis > 0 && rotation.name == Rotations.PYRO_START.name) {
                         Rotations.PYROBLAST_START
                       } else if (mageI < pis) {
@@ -40,9 +40,13 @@ object MageSetups {
                         rotation.rotation
                       }
                       val finalRotationList = if (numMages < 6) Rotations.SCORCH :: rotationList else rotationList
-                      val scorchMage = if (rotation.name == Rotations.SMART_SCORCH.name && mageI == 0) true else false
-                      val spell_power = if (Rotations.ON_USE_VS_TEAR.name == rotation.name && mageI < pis) sp - 55 else sp
-                      Mage(adjustedCrit.toDouble / 100, hit.toDouble / 100, mageI, finalRotationList, spell_power, scorchMage, mageI < pis, if (mageI < pis) 4 else 24)
+                      val scorchMage = if (rotation.name == Rotations.SMART_SCORCH.name && mageI == 0) {
+                        true
+                      } else if (rotation.name == Rotations.TWO_SCORCH.name && mageI < 2) {
+                        true
+                      } else false
+                      var spell_power = if (Rotations.ON_USE_VS_TEAR.name == rotation.name && mageI < pis) sp - 55 else sp
+                      Mage(adjustedCrit.toDouble / 100, hit.toDouble / 100, mageI, finalRotationList, spell_power, scorchMage, mageI < pis, if (mageI < pis) 4 else 8)
                     }
                     mageSetups.put(ms, mageList)
                   }
