@@ -52,97 +52,97 @@ object IgniteTest {
 
     val testMap = magesMap.filter(setup => setup._1.dmf == false && setup._1.nightfall == false)
 
-    println(testMap.size)
+//    println(testMap.size)
+//
+//    implicit val spark = SparkSession.builder().appName("Agg Script For Playtesting")
+//      .master("yarn")
+//      .getOrCreate()
+//
+//    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+//    spark.conf.set("spark.sql.broadcastTimeout", 3000)
+//
+//    import spark.implicits._
+//
+//    println(magesMap.size)
+//
+//    val dataset = spark.createDataset(testMap.toList).repartition(10000)
+//      .map {
+//        case (setup, mages) =>
+//          val trialSetups = List.fill(NUM_TRIALS) {
+//            setupMageStates(setup, mages)
+//          }
+//          (setup, trialSetups)
+//      }.map {
+//        case (setup, trialSetups) =>
+//          val trials = trialSetups.map(ts => simulateFight(ts.mageStates, ts.mageSetup))
+//          createMetrics(setup, trials)
+//      }.cache()
+//
+//    val standard = dataset.filter(_.rotation == Rotations.FIREBALL_DROP.name).withColumnRenamed("dps", "fbdps")
+//      .withColumnRenamed("igniteDps", "ignitefbdps").withColumnRenamed("rotation", "fbRotation")
+//      .drop("stdDev", "boxPlot", "igniteDrops", "weightedTicks")
+//
+//    dataset
+//      .join(standard, Seq("numMages", "nightfall", "darkmoon", "fightLength", "numPIs", "numWB", "semiWB"))
+//      .withColumn("percentDpsIncrease", $"dps" / $"fbdps")
+//      .withColumn("percentIgniteDpsIncrease", $"igniteDps" / $"ignitefbdps")
+//      .as[FinalRowFormatPercent].drop("fbdps", "ignitefbdps", "fbRotation")
+//      .repartition(1)
+//      .write.option("header", "true").mode(SaveMode.Overwrite)
+//      //            .csv("Simulation")
+//      .csv("")
 
-    implicit val spark = SparkSession.builder().appName("Agg Script For Playtesting")
-      .master("yarn")
-      .getOrCreate()
+            val setups = Rotations.rotations.flatMap{ x =>
+              List(
+    //            MageSetup(7, 7, 0, 2, 21, 99, 750, false, false, 100, x),
+                MageSetup(6, 6, 0, 3, 21, 99, 750, false, false, 100, x)
+              )
+            }.sortBy(_.rotation.name)
 
-    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
-    spark.conf.set("spark.sql.broadcastTimeout", 3000)
 
-    import spark.implicits._
 
-    println(magesMap.size)
+        //        val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
+        //          MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
 
-    val dataset = spark.createDataset(testMap.toList).repartition(10000)
-      .map {
-        case (setup, mages) =>
-          val trialSetups = List.fill(NUM_TRIALS) {
-            setupMageStates(setup, mages)
-          }
-          (setup, trialSetups)
-      }.map {
-        case (setup, trialSetups) =>
-          val trials = trialSetups.map(ts => simulateFight(ts.mageStates, ts.mageSetup))
-          createMetrics(setup, trials)
-      }.cache()
+            for (setup <- setups) {
+              val mages = magesMap(setup)
 
-    val standard = dataset.filter(_.rotation == Rotations.FIREBALL_DROP.name).withColumnRenamed("dps", "fbdps")
-      .withColumnRenamed("igniteDps", "ignitefbdps").withColumnRenamed("rotation", "fbRotation")
-      .drop("stdDev", "boxPlot", "igniteDrops", "weightedTicks")
+              val trials = List.fill(NUM_TRIALS) {
+                val ts = setupMageStates(setup, mages)
 
-    dataset
-      .join(standard, Seq("numMages", "nightfall", "darkmoon", "fightLength", "numPIs", "numWB", "semiWB"))
-      .withColumn("percentDpsIncrease", $"dps" / $"fbdps")
-      .withColumn("percentIgniteDpsIncrease", $"igniteDps" / $"ignitefbdps")
-      .as[FinalRowFormatPercent].drop("fbdps", "ignitefbdps", "fbRotation")
-      .repartition(1)
-      .write.option("header", "true").mode(SaveMode.Overwrite)
-      //            .csv("Simulation")
-      .csv("gs://unity-analytics-blender-data-prd/willis/test_run")
+                simulateFight(ts.mageStates, ts.mageSetup)
+              }
 
-    //        val setups = Rotations.rotations.flatMap{ x =>
-    //          List(
-    ////            MageSetup(7, 7, 0, 2, 21, 99, 750, false, false, 100, x),
-    //            MageSetup(6, 6, 0, 3, 21, 99, 750, false, false, 100, x)
-    //          )
-    //        }.sortBy(_.rotation.name)
-    //
-    //
-    //
-    //    //        val setups = List[MageSetup](MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FIREBALL_DROP),
-    //    //          MageSetup(7, 7, 0, 2, 21, 99, 750, true, true, 105, Rotations.FROSTBOLT2))
-    //
-    //        for (setup <- setups) {
-    //          val mages = magesMap(setup)
-    //
-    //          val trials = List.fill(NUM_TRIALS) {
-    //            val ts = setupMageStates(setup, mages)
-    //
-    //            simulateFight(ts.mageStates, ts.mageSetup)
-    //          }
-    //
-    //          //      println(maxTick)
-    //          //      println(biggestCrit)
-    //          //      println(maxMultiplier)
-    //          //      println(avgMultiplier / multiplierCount)
-    //          //      println(multiplierCount)
-    //          //      println(notPICount)
-    //
-    ////          println(s"Num ticks equals: ${numTicks/NUM_TRIALS}")
-    //
-    //          numTicks = 0
-    //          avgMultiplier = 0
-    //          multiplierCount = 0
-    //          maxMultiplier = 0.0
-    //          notPICount = 0
-    //
-    //          val rowMetric = createMetrics(setup, trials)
-    //
-    //          //      println(mqgCasts.toDouble / NUM_TRIALS)
-    //          //      println(fireballCasts.toDouble / NUM_TRIALS)
-    //          //      println(scorchCasts.toDouble / NUM_TRIALS)
-    //
-    //          println(setup)
-    //          //      println(dpsStdDev)
-    //          println(rowMetric.boxPlot)
-    //          println(s"Confidence interval 99%: ${rowMetric.dps} +/- ${(2.576 * rowMetric.stdDev / math.sqrt(NUM_TRIALS)).round}")
-    //          println(rowMetric.igniteDps)
-    //          println(rowMetric.weightedTicks)
-    //          println(rowMetric.igniteDrops)
-    //
-    //        }
+              //      println(maxTick)
+              //      println(biggestCrit)
+              //      println(maxMultiplier)
+              //      println(avgMultiplier / multiplierCount)
+              //      println(multiplierCount)
+              //      println(notPICount)
+
+    //          println(s"Num ticks equals: ${numTicks/NUM_TRIALS}")
+
+              numTicks = 0
+              avgMultiplier = 0
+              multiplierCount = 0
+              maxMultiplier = 0.0
+              notPICount = 0
+
+              val rowMetric = createMetrics(setup, trials)
+
+              //      println(mqgCasts.toDouble / NUM_TRIALS)
+              //      println(fireballCasts.toDouble / NUM_TRIALS)
+              //      println(scorchCasts.toDouble / NUM_TRIALS)
+
+              println(setup)
+              //      println(dpsStdDev)
+              println(rowMetric.boxPlot)
+              println(s"Confidence interval 99%: ${rowMetric.dps} +/- ${(2.576 * rowMetric.stdDev / math.sqrt(NUM_TRIALS)).round}")
+              println(rowMetric.igniteDps)
+              println(rowMetric.weightedTicks)
+              println(rowMetric.igniteDrops)
+
+            }
 
   }
 
