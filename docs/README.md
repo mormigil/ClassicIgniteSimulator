@@ -31,6 +31,10 @@ I had to use all numeric values for the parallel coordinates graph so the rotati
 - Rotation 8: 
     + PI: Scorch -> Combustion + MQG -> Pyroblast -> Fireball
     + Non-PI: Scorch -> Pyroblast -> Fireball
+- Rotation 9:
+    + Rotation 6 with fireblast weaving and staggering combustion
+- Rotation 10:
+    + Rotation 7 with fireblast weaving and staggering combustion
 
 ## Num Ony
 
