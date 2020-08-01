@@ -48,7 +48,7 @@ object IgniteTest {
 
   def main(args: Array[String]): Unit = {
 
-    val magesMap = MageSetups.genMageSetups(21, 99, 750)
+    val magesMap = MageSetups.genMageSetups(21, 99, 863)
 
     val testMap = magesMap.filter(setup => setup._1.dmf == false && setup._1.nightfall == false)
 
@@ -95,7 +95,7 @@ object IgniteTest {
     val setups = Rotations.rotations.flatMap{ x =>
       List(
 //            MageSetup(7, 7, 0, 2, 21, 99, 750, false, false, 100, x),
-        MageSetup(7, 1, 5, 2, 21, 99, 750, false, false, 40, x)
+        MageSetup(7, 1, 5, 2, 21, 99, 863, false, false, 100, x)
       )
     }.sortBy(_.rotation.name)
 
