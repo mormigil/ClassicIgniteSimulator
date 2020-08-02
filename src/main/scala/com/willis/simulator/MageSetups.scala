@@ -27,7 +27,7 @@ object MageSetups {
           for (pis <- 0 to 5) {
             for (nightfall <- 0 to 1) {
               for (dmf <- 0 to 1) {
-                for (fightLength <- 40 to 120 by 20) {
+                for (fightLength <- 40 to 120 by 10) {
                   for (rotation <- Rotations.rotations) {
                     val ms = MageSetup(numMages, numWB, semiWB - numWB, pis, baseCrit, hit, sp, nightfall == 1, dmf == 1, fightLength, rotation)
                     val mageList = List.tabulate(numMages) { mageI =>
@@ -39,10 +39,10 @@ object MageSetups {
                       } else {
                         rotation.rotation
                       }
-                      val finalRotationList = if (numMages < 6) Rotations.SCORCH :: rotationList else rotationList
-                      val scorchMage = if (rotation.name == Rotations.SMART_SCORCH.name && mageI == 0) {
+                      val finalRotationList = if (numMages < 5) Rotations.SCORCH :: rotationList else rotationList
+                      val scorchMage = if (Rotations.ONE_SCORCH.contains(rotation.name) && mageI == 0) {
                         true
-                      } else if (rotation.name == Rotations.TWO_SCORCH.name && mageI < 2) {
+                      } else if (Rotations.TWO_SCORCH_LIST.contains(rotation.name) && mageI < 2) {
                         true
                       } else false
                       var spell_power = if (Rotations.ON_USE_VS_TEAR.name == rotation.name && mageI < pis) sp - 55 else sp

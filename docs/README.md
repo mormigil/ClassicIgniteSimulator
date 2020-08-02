@@ -26,19 +26,17 @@ I had to use all numeric values for the parallel coordinates graph so the rotati
     + Non-PI: Scorch -> Frostbolt -> Fireball -> Combustion
 - Rotation 4: Fireblast weaving. Same as Rotation 1 except cast fireblast when off cooldown when a 5 stack ignite exists
 - Rotation 5: Stagger combustion so as soon as no combustions are active the next mage to cast immediately uses it
-- Rotation 6: Same as rotation 1 except 1 Mage casts scorch continously while ignite has 5 stacks
-- Rotation 7 Same as rotation 6 except 2 Mages cast scorch continuously while ignite has 5 stacks
+- Rotation 6: Same as rotation 1 except 1 Mage casts scorch continously while ignite has 5 stacks and staggers combustion and weaves in fireblasts
+- Rotation 7 Same as rotation 6 except 2 Mages cast scorch continuously while ignite has 5 stacks and staggers combustion and weaves in fireblasts
 - Rotation 8: 
     + PI: Scorch -> Combustion + MQG -> Pyroblast -> Fireball
     + Non-PI: Scorch -> Pyroblast -> Fireball
-- Rotation 9:
-    + Rotation 6 with fireblast weaving and staggering combustion
-- Rotation 10:
-    + Rotation 7 with fireblast weaving and staggering combustion
 
 ## Num Ony
 
-This column just reflects mages that only haave ony buff.
+This column just reflects mages that only have ony buff. Num WB in contrast is all WB as in Ony + Songflower + DMT
+
+Therefore the sum of num world buffs and num ony can only ever be the number of mages because no mage can have only ony and all the world buffs at the same time.
 
 
 ## Looking at the raw data
@@ -50,4 +48,6 @@ Feel free to peruse through the raw data I split it into files based on the numb
 Before the 4 second window change here were the comparison charts:
 [Raw DPS](https://mormigil.github.io/ClassicIgniteSimulator/dps.html)
 [Ignite DPS](https://mormigil.github.io/ClassicIgniteSimulator/ignite_dps.html)
+
+I accidentally removed the simple smart 1 or 2 scorches.
 
